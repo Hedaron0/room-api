@@ -1,0 +1,47 @@
+### Get all rooms
+GET http://localhost:8080/api/rooms
+
+### Get all rooms, filtered by minCapacity
+GET http://localhost:8080/api/rooms?minCapacity=8
+
+### Get all rooms, filtered by keyword
+GET http://localhost:8080/api/rooms?keyword=pod
+
+### Get one room that exists
+GET http://localhost:8080/api/rooms/1
+
+### Get one room that does not exist (expect 404)
+GET http://localhost:8080/api/rooms/999
+
+### Create a room (expect 201 + Location header)
+POST http://localhost:8080/api/rooms
+Content-Type: application/json
+
+{
+  "name": "Lecture Hall",
+  "capacity": 40
+}
+
+### Update a room that exists (expect 200)
+PUT http://localhost:8080/api/rooms/1
+Content-Type: application/json
+
+{
+  "name": "Seminar A (renovated)",
+  "capacity": 10
+}
+
+### Update a room that does not exist (expect 404)
+PUT http://localhost:8080/api/rooms/999
+Content-Type: application/json
+
+{
+  "name": "Ghost Room",
+  "capacity": 1
+}
+
+### Delete a room that exists (expect 204)
+DELETE http://localhost:8080/api/rooms/2
+
+### Delete a room that does not exist (expect 404)
+DELETE http://localhost:8080/api/rooms/999
