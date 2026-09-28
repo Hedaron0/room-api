@@ -19,7 +19,16 @@ Content-Type: application/json
 
 {
   "name": "Lecture Hall",
-  "capacity": 40
+  "capacity": 15
+}
+
+### Create a room with capacity out of range (expect 400)
+POST http://localhost:8080/api/rooms
+Content-Type: application/json
+
+{
+  "name": "Too Big",
+  "capacity": 50
 }
 
 ### Update a room that exists (expect 200)
@@ -38,6 +47,15 @@ Content-Type: application/json
 {
   "name": "Ghost Room",
   "capacity": 1
+}
+
+### Update a room with capacity out of range (expect 400)
+PUT http://localhost:8080/api/rooms/1
+Content-Type: application/json
+
+{
+  "name": "Seminar A",
+  "capacity": 0
 }
 
 ### Delete a room that exists (expect 204)
