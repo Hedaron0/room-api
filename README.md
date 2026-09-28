@@ -1,21 +1,17 @@
 # room-api
 
-A small REST API for managing a list of rooms (name + capacity) that can be searched, created, updated, and deleted.
+| Method | Path              | Status      | Description                                  |
+|--------|-------------------|-------------|-----------------------------------------------|
+| GET    | /api/rooms        | 200         | List all rooms, optional `minCapacity` and `keyword` query filters |
+| GET    | /api/rooms/{id}   | 200/404     | Get one room by id, 404 if it doesn't exist  |
+| POST   | /api/rooms        | 201/400     | Create a room, returns it with a `Location` header pointing to `/api/rooms/{id}`. 400 if capacity isn't 1-20 |
+| PUT    | /api/rooms/{id}   | 200/404/400 | Replace a room's name/capacity, 404 if it doesn't exist, 400 if capacity isn't 1-20 |
+| DELETE | /api/rooms/{id}   | 204/404     | Delete a room, 404 if it doesn't exist       |
 
-## Endpoints
-
-| Method | Path              | Status  | Description                                  |
-|--------|-------------------|---------|-----------------------------------------------|
-| GET    | /api/rooms        | 200     | List all rooms, optional `minCapacity` and `keyword` query filters |
-| GET    | /api/rooms/{id}   | 200/404 | Get one room by id, 404 if it doesn't exist  |
-| POST   | /api/rooms        | 201     | Create a room, returns it with a `Location` header pointing to `/api/rooms/{id}` |
-| PUT    | /api/rooms/{id}   | 200/404 | Replace a room's name/capacity, 404 if it doesn't exist |
-| DELETE | /api/rooms/{id}   | 204/404 | Delete a room, 404 if it doesn't exist       |
-
-## How to run
+JDK 24.
 
 ```
 ./gradlew bootRun
 ```
 
-The server starts on `http://localhost:8080`. See `api.http` for a request against every endpoint above.
+AI use: got help from Claude to design the service/repository split and the capacity rule, then went through the code with it until I understood every part.
