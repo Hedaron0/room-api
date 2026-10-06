@@ -58,8 +58,15 @@ Content-Type: application/json
   "capacity": 0
 }
 
-### Delete a room that exists (expect 204)
-DELETE http://localhost:8080/api/rooms/2
+### Delete a room that exists and has no reservations (expect 204, the room created by the POST above)
+DELETE http://localhost:8080/api/rooms/4
 
 ### Delete a room that does not exist (expect 404)
 DELETE http://localhost:8080/api/rooms/999
+
+### Delete a room that has reservations (expect 409)
+DELETE http://localhost:8080/api/rooms/1
+
+### Room count (expect {"rooms": 3} after the delete above)
+GET http://localhost:8080/api/stats
+
