@@ -4,6 +4,8 @@ import java.net.URI;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -11,7 +13,6 @@ import io.swagger.v3.oas.annotations.Operation;
 
 @RequestMapping("api/rooms")
 @RestController
-
 public class RoomController {
 
     private final RoomService roomService;
@@ -40,7 +41,7 @@ public class RoomController {
     public ResponseEntity<Room> create(@RequestBody RoomCreateRequest request) {
         try {
             Room room = roomService.create(request.name(), request.capacity());
-            URI location = URI.create("/api/rooms/" + room.id());
+            URI location = URI.create("/api/rooms/" + room.getId());
             return ResponseEntity.created(location).body(room);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().build();
@@ -59,11 +60,14 @@ public class RoomController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
-        boolean removed = roomService.delete(id);
-        if(!removed) {
-            return ResponseEntity.notFound().build();
+        try {
+            boolean removed = roomService.delete(id);
+            if(!removed) {
+                return ResponseEntity.notFound().build();
+            }
+            return ResponseEntity.noContent().build();
+        } catch (DataIntegrityViolationException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).build();
         }
-        return ResponseEntity.noContent().build();
-
     }
 }
