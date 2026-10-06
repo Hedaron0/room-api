@@ -15,10 +15,14 @@ public class RoomService {
     }
 
     public List<Room> search(Integer minCapacity, String keyword) {
-        return roomRepository.findAll().stream()
-                .filter(r -> minCapacity == null || r.capacity() >= minCapacity)
-                .filter(r -> keyword.isEmpty() || r.name().toLowerCase().contains(keyword.toLowerCase()))
-                .toList();
+        if (minCapacity == null) {
+            return roomRepository.findByNameContainingIgnoreCase(keyword);
+        }
+        return roomRepository.findByCapacityGreaterThanEqualAndNameContainingIgnoreCase(minCapacity, keyword);
+    }
+
+    public long count() {
+        return roomRepository.count();
     }
 
     public Optional<Room> findById(Long id) {
@@ -37,7 +41,11 @@ public class RoomService {
     }
 
     public boolean delete(Long id) {
-        return roomRepository.deleteById(id);
+        if (!roomRepository.existsById(id)) {
+            return false;
+        }
+        roomRepository.deleteById(id);
+        return true;
     }
 
     private void checkCapacity(int capacity) {
