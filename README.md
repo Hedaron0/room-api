@@ -32,6 +32,9 @@ mysql -u roomapp -p roomdb < reset.sql
 ```
 
 Run `reset.sql` before every `api.http` run; the expected results assume that starting state.
+
+## Tables
+
 **room**
 
 | Column   | Type         | Notes                              |
