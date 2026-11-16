@@ -13,6 +13,9 @@
 | GET    | /api/reservations?reservedBy= | 200/400 | One person's reservations with room names (one JOIN FETCH), 400 if `reservedBy` is missing |
 | GET    | /api/reservations/{id} | 200/404 | One reservation |
 | DELETE | /api/reservations/{id} | 204/404 | Cancel a reservation |
+| POST   | /api/auth/signup  | 201/400/409 | Create an account, returns id, username, role (never the password) |
+| POST   | /api/auth/login   | 200/400/401 | Log in, returns a JWT access token |
+| GET    | /api/auth/me      | 200/401     | Who is logged in |
 
 JDK 21.
 
@@ -30,7 +33,7 @@ CREATE USER 'roomapp'@'localhost' IDENTIFIED BY 'roomapp1234';
 GRANT ALL PRIVILEGES ON roomdb.* TO 'roomapp'@'localhost';
 ```
 
-Then create the tables and sample data (3 rooms, 5 reservations) with `reset.sql`:
+Then create the tables and sample data (3 rooms, 5 reservations, 3 accounts) with `reset.sql`:
 
 ```
 mysql -u roomapp -p roomdb < reset.sql
@@ -57,6 +60,15 @@ Run `reset.sql` before every `api.http` run; the expected results assume that st
 | reserved_by | VARCHAR(50) | required                                 |
 | start_time  | DATETIME    | required                                 |
 | end_time    | DATETIME    | required                                 |
+
+**app_user**
+
+| Column        | Type         | Notes                               |
+|---------------|--------------|-------------------------------------|
+| id            | BIGINT       | primary key, generated              |
+| username      | VARCHAR(20)  | required, unique                    |
+| password_hash | VARCHAR(100) | BCrypt hash, the password is never stored |
+| role          | VARCHAR(20)  | USER or ADMIN                       |
 
 Relationship: one room has many reservations (1 : N). The foreign key lives on the "many" side, so `reservation.room_id` points to `room.id`, and `room` does not keep a list of reservations.
 
@@ -103,11 +115,24 @@ Example (request 29, capacity 0):
 | Status | Meaning |
 |--------|---------|
 | 400 | wrong input: invalid field, start not before end, bad JSON, wrong id type, missing parameter |
+| 401 | not logged in, wrong username or password, or a broken/expired token |
 | 404 | room, reservation or URL not found |
 | 409 | room already booked at that time, or deleting a room that has reservations |
 | 500 | server bug, only "unexpected server error" is returned |
 
-My own requests: 42 and 43 in `api.http`.
+My own requests: 57 and 58 in `api.http`.
+
+## Authentication
+
+Public: all `GET /api/rooms/**`, `GET /api/stats`, `POST /api/auth/signup`, `POST /api/auth/login`.
+Everything else needs a login (all POST/PUT/DELETE, `GET /api/reservations/**`, `GET /api/auth/me`).
+
+Get a token with `POST /api/auth/login` and `{ "username": "mina", "password": "mina1234" }`.
+Send it as `Authorization: Bearer <accessToken>` (lasts 30 min). HTTP Basic also works.
+
+The JWT secret comes from the `JWT_SECRET` environment variable (there is a default for class).
+
+Sample accounts from `reset.sql`: mina / mina1234, omar / omar1234, admin / admin1234 (ADMIN).
 
 The queries for Assignment 3 are in `queries.sql`.
 AI use: got help from Claude while writing and understanding the code.
