@@ -7,6 +7,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -51,6 +54,18 @@ public class ApiExceptionHandler {
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public ResponseEntity<ApiError> wrongType(MethodArgumentTypeMismatchException e, HttpServletRequest request) {
         return respond(HttpStatus.BAD_REQUEST, "'" + e.getName() + "' has the wrong type", request, List.of());
+    }
+
+    // 401: from the security filters (through ApiAuthenticationEntryPoint) and from login
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity<ApiError> unauthorized(AuthenticationException e, HttpServletRequest request) {
+        String message = "login required";
+        if (e instanceof BadCredentialsException) {
+            message = "wrong username or password";
+        } else if (e instanceof OAuth2AuthenticationException) {
+            message = "token is invalid or expired";
+        }
+        return respond(HttpStatus.UNAUTHORIZED, message, request, List.of());
     }
 
     @ExceptionHandler(Exception.class)
